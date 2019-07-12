@@ -71,7 +71,7 @@ public class TransactionManagerSetup {
 
         logger.info("Setting up database connection: " + databaseProduct);
         this.databaseProduct = databaseProduct;
-        databaseProduct.configuration.configure(datasource, connectionURL);
+        databaseProduct.configuration.configure(datasource, "jdbc:mysql://localhost:3306/JH");
 
         logger.fine("Initializing transaction and resource management");
         datasource.init();

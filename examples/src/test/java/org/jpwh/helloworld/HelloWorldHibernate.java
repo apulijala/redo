@@ -104,7 +104,7 @@ public class HelloWorldHibernate extends TransactionManagerTest {
             Session session = sessionFactory.getCurrentSession();
 
             Message message = new Message();
-            message.setText("Hello World!");
+            message.setText("Hello World 2!");
 
                 /*
                     The native Hibernate API is very similar to the standard Java Persistence API and most methods
@@ -135,7 +135,7 @@ public class HelloWorldHibernate extends TransactionManagerTest {
             // SELECT * from MESSAGE
 
             assertEquals(messages.size(), 1);
-            assertEquals(messages.get(0).getText(), "Hello World!");
+            assertEquals(messages.get(0).getText(), "Hello World 2!");
 
             tx.commit();
         }

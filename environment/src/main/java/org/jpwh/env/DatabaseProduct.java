@@ -32,7 +32,7 @@ public enum DatabaseProduct {
     MYSQL (
             (ds, connectionURL) -> {
                 ds.setClassName("bitronix.tm.resource.jdbc.lrc.LrcXADataSource");
-                ds.getDriverProperties().put( "url","jdbc:mysql://localhost:3306/JH" );
+                ds.getDriverProperties().put( "url", connectionURL );
                 ds.getDriverProperties().put("user", "arvind");
                 ds.getDriverProperties().put("password", "Password12!");
                 ds.getDriverProperties().put("driverClassName", "com.mysql.jdbc.Driver");
