@@ -1,22 +1,20 @@
 package org.jpwh.model.simple;
 
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.jpwh.model.Constants;
 
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.sql.DataSource;
 import javax.validation.constraints.Future;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Null;
 import javax.validation.constraints.Size;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
+public  class Item {
 
-public class Item {
+
+    private Long id;
 
     @NotNull
     @Size(
@@ -24,14 +22,16 @@ public class Item {
             max = 255,
             message = "Name is required, maximum 255 characters."
     )
-    protected String name;
-
-    @Id
-    @GeneratedValue(generator = Constants.ID_GENERATOR)
-    protected Long id;
+    private String name;
 
     @Future
-    protected Date auctionEnd;
+    private Date auctionEnd;
+    private Set<Bid> bids = new HashSet<>();
+
+
+    public Item() {
+
+    }
 
     public String getName() {
         return name;
@@ -49,26 +49,24 @@ public class Item {
         this.auctionEnd = auctionEnd;
     }
 
-
-
-    protected Set<Bid>  bids = new HashSet<Bid>();
     public Set<Bid> getBids() {
         return bids;
     }
 
-    public void setBids(Set<Bid> bids) {
-        this.bids = bids;
-    }
-
-
     public void addBid(Bid bid) {
+
         if (bid == null) {
-            throw new NullPointerException("Can't add null Bid");
+            throw new NullPointerException("Can't add null bid");
         }
         if (bid.getItem() != null) {
-            throw new IllegalArgumentException("Bid is already assigned to an Item");
+            throw new IllegalStateException("Bid is already assigned to an item");
         }
+
+        // Bi drectional relationship
         getBids().add(bid);
         bid.setItem(this);
     }
+
 }
+
+

@@ -1,5 +1,6 @@
 package org.jpwh.test.simple;
 
+
 import org.jpwh.model.simple.Bid;
 import org.jpwh.model.simple.Item;
 import org.testng.Assert;
@@ -22,10 +23,8 @@ public class ModelOperations {
     public void linkAndBidItem() {
 
         Item anItem = new Item();
-        Bid aBid = new Bid();
-
-        anItem.getBids().add(aBid);
-        aBid.setItem(anItem);
+        // Do it differently.
+        Bid aBid = new Bid(anItem);
 
         assertEquals(anItem.getBids().size(), 1);
         assertTrue(anItem.getBids().contains(aBid));
@@ -33,32 +32,40 @@ public class ModelOperations {
 
         Bid secondBid = new Bid();
         anItem.addBid(secondBid);
-
-        assertEquals(2, anItem.getBids().size());
+        assertEquals(anItem.getBids().size(), 2);
         assertTrue(anItem.getBids().contains(secondBid));
-        assertEquals(anItem, secondBid.getItem());
-    }
+        assertEquals(secondBid.getItem(), anItem);
 
+
+    }
 
     @Test
     public void validateItem() {
-        ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
-        Validator validator = factory.getValidator();
 
-        Item item = new Item();
-        item.setName("Some Item");
-        item.setAuctionEnd(new Date());
+        Item anItem = new Item();
+        anItem.setName("Cheating Guru");
+        anItem.setAuctionEnd(new Date());
 
-        Set<ConstraintViolation<Item>> violations = validator.validate(item);
-        assertEquals(1 , violations.size());
-        ConstraintViolation<Item> violation = violations.iterator().next();
-        String failedProertyName =
-                violation.getPropertyPath().iterator().next().getName();
-        assertEquals(failedProertyName, "auctionEnd");
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        Validator validator = validatorFactory.getValidator();
+        Set<ConstraintViolation<Item>> violations
+                = validator.validate(anItem);
 
-        if (Locale.getDefault().getLanguage().equals("en")) {
-            assertEquals(violation.getMessage(), "must be in the future");
+        assertEquals(violations.size(), 1);
+        ConstraintViolation<Item> constraintViolation =
+                violations.iterator().next();
+
+        String propertyName = constraintViolation.getPropertyPath().iterator().next().getName();
+
+        assertEquals(propertyName, "auctionEnd");
+
+        if (Locale.getDefault().getLanguage().equalsIgnoreCase("en")) {
+            assertEquals(constraintViolation.getMessage(), "must be in the future");
         }
 
+
     }
+
+
 }
+

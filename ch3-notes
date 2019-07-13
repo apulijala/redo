@@ -1,0 +1,69 @@
+1) Steps to do the querying
+
+a) First create a CriteriaBuidler.
+CriteriaBuilder cb = 
+	entityManager.createCriteriaBuilder
+
+b) Create a query. 
+	CriteriaQuery<Item> query = 
+		cb.createQuery(Item.class);
+
+c) Get a Root item. 
+	Root<Item> fromItem = query.from(Item.class);
+
+d) Get the results. Retrieve all the items. 
+	List<Item> items = em.createQuery(query).getResultList();
+
+For applying filters to the lists.  (First way)
+	
+	Path<String> namePath = fromItem.get("name");
+	query.where(
+			cb.like(namePath, cb.parameter(String.class, "pattern") // could be anything.
+		);
+	
+	// Get the results.
+	items = entityManager.createQuery(query)
+			.setParameter("pattern", "%some item%")		
+			.getResultList();
+
+
+For applying filters to the lists (Second way)
+
+	query.where(
+			cb.like (Item_.name, cb.parameter(String.class, "pattern")
+		   );
+	entityManager.createQuery(query).
+		  setParameter("pattern" "%some item%")
+		.getResultList();
+
+
+
+Item_ is a special class which should be designed as follows.
+
+@javax.persistence.metamodel.StaticMetamodel(Item.class)
+public abstract class Item_ {
+
+	public static volataile SingularAttribute<Item, String> name;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+

@@ -7,17 +7,18 @@
 
     <named-query name="findItems">
         <query><![CDATA[
-          select i from Item i
-        ]]></query>
+        select i from Item i
+        ]]>
+        </query>
     </named-query>
 
-    
     <named-query name="findItemsWithHints">
         <query>select i from Item i</query>
-        <hint name="org.hibernate.comment" value="My Comment"/>
-        <hint name="org.hibernate.fetchSize" value="50"/>
+        <hint name="org.hibernate.comment" value="My Comment"></hint>
+        <hint name="org.hibernate.fetchSize" value="50"></hint>
         <hint name="org.hibernate.readOnly" value="true"/>
         <hint name="org.hibernate.timeout" value="60"/>
     </named-query>
-    
+
+
 </entity-mappings>

@@ -12,10 +12,10 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Root;
+import javax.persistence.metamodel.Attribute;
 import javax.persistence.metamodel.ManagedType;
 import javax.persistence.metamodel.Metamodel;
 import javax.persistence.metamodel.SingularAttribute;
-import javax.persistence.metamodel.Type;
 import javax.transaction.UserTransaction;
 import java.util.Date;
 import java.util.List;
@@ -23,9 +23,9 @@ import java.util.Set;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
+import static org.testng.AssertJUnit.assertTrue;
 
 public class AccessJPAMetamodel extends JPATest {
-
 
     @Override
     public void configurePersistenceUnit() throws Exception {
@@ -33,109 +33,101 @@ public class AccessJPAMetamodel extends JPATest {
     }
 
     @Test
-    public void accessDynamicMetaModel() throws Exception {
+    public void accessDynamicMetamodel() {
 
-        EntityManagerFactory entityManagerFactory = JPA.getEntityManagerFactory();
-        Metamodel mm = entityManagerFactory.getMetamodel();
-        Set<ManagedType<?>> managedTypes =
-                mm.getManagedTypes();
+        EntityManagerFactory entityManagerFactory =
+                JPA.getEntityManagerFactory();
+        Metamodel mm =
+                entityManagerFactory.getMetamodel();
+
+        Set<ManagedType<?>> managedTypes = mm.getManagedTypes();
         assertEquals(managedTypes.size(), 1);
-
-        ManagedType itemType = managedTypes.iterator().next();
-        assertEquals(itemType.getPersistenceType(),
-                Type.PersistenceType.ENTITY );
-
+        ManagedType<?> managedType =
+                managedTypes.iterator().next();
         SingularAttribute nameAttribute =
-                itemType.getSingularAttribute("name");
-        assertEquals(nameAttribute.getJavaType(),
-                String.class);
+                managedType.getSingularAttribute("name");
 
-        SingularAttribute auctionEndDateAttribute =
-                itemType.getSingularAttribute("auctionEnd");
-        assertEquals(auctionEndDateAttribute.getJavaType(),
-                Date.class
-                );
+        assertEquals(nameAttribute.getJavaType(), String.class);
+        assertEquals(nameAttribute.getPersistentAttributeType(),
+                Attribute.PersistentAttributeType.BASIC);
+        assertFalse(nameAttribute.isOptional());
 
-        assertFalse(auctionEndDateAttribute.isCollection());
-        assertFalse(auctionEndDateAttribute.isAssociation());
+
+        SingularAttribute auctionEndAttribute =
+                managedType.getSingularAttribute("auctionEnd");
+        assertEquals(auctionEndAttribute.getJavaType(), Date.class);
+        assertEquals(auctionEndAttribute.getPersistentAttributeType(),
+                Attribute.PersistentAttributeType.BASIC);
+        assertTrue(auctionEndAttribute.isOptional());
+
 
     }
 
+
     @Test
-    public void queryStaticMetamodel() throws  Exception {
+    public void queryStaticMetamodel() throws Exception {
 
         UserTransaction tx = TM.getUserTransaction();
         try {
+
             tx.begin();
 
-            EntityManager  entityManager = JPA.createEntityManager();
+            EntityManager entityManager = JPA.createEntityManager();
+            Item item1 = new Item();
+            item1.setName("This is some item");
+            item1.setAuctionEnd(new Date(System.currentTimeMillis() + 10000));
+            entityManager.persist(item1);
 
-            Item itemOne = new Item();
-            itemOne.setName("This is some item");
-            itemOne.setAuctionEnd(new Date(System.currentTimeMillis() + 100000));
-            entityManager.persist(itemOne);
+            Item item2 = new Item();
+            item2.setName("Another item");
+            item2.setAuctionEnd(new Date(System.currentTimeMillis() + 10000));
+            entityManager.persist(item2);
 
-            Item itemTwo = new Item();
-            itemTwo.setName("Another Item");
-            itemTwo.setAuctionEnd(new Date(System.currentTimeMillis() + 100000));
 
-            entityManager.persist(itemTwo);
             tx.commit();
             entityManager.close();
 
             entityManager = JPA.createEntityManager();
-            tx.begin();
-
-            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-            CriteriaQuery<Item> query = cb.createQuery(Item.class);
-            Root<Item> fromItem = query.from(Item.class);
-            query.select(fromItem);
-
+            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Item> criteriaQuery =
+                    criteriaBuilder.createQuery(Item.class);
+            Root<Item> fromItem =
+                    criteriaQuery.from(Item.class);
             List<Item> items =
-                    entityManager.createQuery(query)
-                            .getResultList();
+                    entityManager.createQuery(criteriaQuery).getResultList();
             assertEquals(items.size(), 2);
 
+            // filter 1.
             Path<String> namePath = fromItem.get("name");
-            query.where(
-              cb.like(namePath,
-                      cb.parameter(String.class, "pattern"))
+
+            criteriaQuery.where(
+                    criteriaBuilder.like(namePath,
+                            criteriaBuilder.parameter(String.class, "pattern"))
             );
 
-            items =
-                    entityManager.createQuery(query).
-                            setParameter("pattern", "%some item%").
-                            getResultList();
+            items = entityManager.createQuery(criteriaQuery)
+                    .setParameter("pattern", "%some item%")
+                    .getResultList();
             assertEquals(items.size(), 1);
-            assertEquals(items.iterator().next().getName(), "This is some item");
 
-            query.where(cb.like(
-                fromItem.get(Item_.name),
-                cb.parameter(String.class,"pattern")
+            // Filter 2 using the name class.
 
-            ));
+            criteriaQuery.where(
+                    criteriaBuilder.like(fromItem.get(Item_.name),
+                            criteriaBuilder.parameter(String.class, "pattern"))
 
+            );
 
-            items = entityManager.createQuery(query)
-                                .setParameter("pattern", "%some item%")
-                                .getResultList();
+            items = entityManager.createQuery(criteriaQuery)
+                    .setParameter("pattern", "%some item%")
+                    .getResultList();
             assertEquals(items.size(), 1);
-            assertEquals(items.iterator().next().getName(), "This is some item");
 
 
-            tx.commit();
-            entityManager.close();
-
-        }finally {
+        } finally {
             TM.rollback();
         }
-
-
-
-
-
 
     }
 
 }
-
