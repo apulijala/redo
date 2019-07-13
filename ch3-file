@@ -1,0 +1,185 @@
+Domain Model
+-----
+(Do each of them in order, and complete test and then go to next piece of work. ) If no tests, just put it and then move.
+
+Item has one or more bids 
+and bid is for one item.
+
+Domain model of item
+-----
+
+Item.java
+	String name;
+	Long id;
+	Date auctionEnd
+	Set bids (HashSet)
+
+	Add helper method for adding bids to an itmme.
+	addBid
+	check for null (Can't add null bid)
+	check for gettingItem (Bid is already assigned to an item)
+	Logic for adding bids. (You need to figure it out)
+
+
+Bid.java
+	Two constructors.
+	Bid() and Bid(Item item)  Establish relationship setter/getter for an item.
+
+
+Test this out.
+	ModelOprations and test method is linkAndBidItem()
+	Create anItem and aBid
+	Set the relationships. (Manually no helper method or helper code in constructor.)
+	Do the following assertions.
+	Get bids for an item ans size check
+	Get bids for an item and check 
+	get item from a bid and check.
+
+	
+	Create secondItem and aBid but use helper method to get the relationship
+	Assert 2 as bids size.
+	and two more test for above.	
+	
+
+Validation
+--------
+Annotation based metadata
+--------------
+name 
+ NotNullable, Size is 2, max characters is 255, Message = "Name is required, maximum 255 characters."
+
+auctionEnd 
+Should be Future.
+
+Test (validateItem)
+-----
+Create an Item and set End date as today.
+Check that violations size is 1.
+Failed property name should be auctionEnd.
+And if locale is en
+Check that the message is "must be in the future"
+
+
+Second iteration.
+Modify the code so that 
+There are two violations on the auctionEnd and name (For name you can put the min characters as 5)
+and also add message for future date and check the violations.
+
+First time took 14:11 (Practice git again.)
+
+
+
+Annotation based metadata
+Let us do this
+
+PUtting metadata in package-info.java
+-------------------------
+
+
+
+
+Externalizing metadata with XML Files.
+---------------------------
+Putting metadata in xml files is externalizaing	
+JPA XML containing metadata
+
+a) Firstly, put the global metadata.
+
+b) ignore all annotations and all mappings metadata in XML Files.
+
+c) retain some default settings.
+
+d) For an entity Item, set field level access.
+Get the following attributes.
+id, Gerneattion strategy is auto.
+map name, and auctionEnd and mark auctionEnd as temporal attribute.
+
+Queries -- PUt them in queries.xml file.
+Put two named queries. 
+findItems (Query name)
+select i from item i
+
+findItemsWIthHInts.
+find item
+With following hints. -- comment ( Should have value My Comment), fetchSize = 50, readOnly is true and timeout value is 60
+
+
+
+PUt them in 
+SimpleXMLCompletePU in persistence.xml file
+
+
+
+Hibernate xml file.
+Native.hbm.xml file.
+Map Item class.
+id , with generator as native.
+map name and auctionEnd (timestamp)
+
+Query name,
+findItemsHibernate - select all items.
+
+database-object.
+create index ITEM_NAME_IDX on ITEM(NAME)
+drop index ITEM_NAME_IDX.
+
+
+
+
+
+Meta Model API
+=------
+
+Write a test method in Test class (AccessJPAMetamodel) and configurePersistentUtnit	
+
+accessDynamicMetamodel
+Get Metamodel = 
+assert managedTypes size should be 1.
+assert persistenceType is ENTITY.
+
+
+Get the singular attributes.
+name and is of type string and is BASIC attirbute type. and is not optional. (Seprate test cases for each of them)
+
+auctionEnd is a Date, isNotCollection and isNotAssociation.
+
+
+Test 2
+---------
+
+queryStaticMetamodel
+
+Create two items ("This is some item" and "Another item" and set auction end dates as
+currentTimeInMillis + 100000
+
+First create a crieteria query and assert that size is 2.
+
+
+Then create a criteria with name and pattern with "some item" as the criteria
+and assert it that the size is 1.
+
+
+Then second criteria with Item_class and test that the results are same as above.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+		
+		
+
+
+
+
+

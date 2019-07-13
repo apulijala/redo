@@ -24,12 +24,13 @@
         <jta-data-source>myDS1</jta-data-source>
         <mapping-file>simple/Mappings.xml</mapping-file>
         <mapping-file>simple/Queries.xml</mapping-file>
-        
+
+        <!-- ignore hbm files and hibernate classes -->
         <properties>
-            <property name="hibernate.archive.autodetection"
-                      value="none"/>
+            <property name="hibernate.archive.autodetection" value="none"/>
+
         </properties>
-        
+
     </persistence-unit>
     
     
